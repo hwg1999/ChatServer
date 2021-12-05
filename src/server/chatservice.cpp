@@ -1,6 +1,7 @@
 #include "chatservice.hpp"
+#include "Logger.hpp"
 #include "public.hpp"
-#include <muduo/base/Logging.h>
+
 #include <vector>
 
 ChatService *ChatService::instance() {
@@ -10,26 +11,41 @@ ChatService *ChatService::instance() {
 
 ChatService::ChatService() {
   msgHandlerMap_.insert(
-      {LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
+      {LOGIN_MSG, std::bind(&ChatService::login, this, std::placeholders::_1,
+                            std::placeholders::_2, std::placeholders::_3)});
   msgHandlerMap_.insert(
-      {REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
+      {REG_MSG, std::bind(&ChatService::reg, this, std::placeholders::_1,
+                          std::placeholders::_2, std::placeholders::_3)});
   msgHandlerMap_.insert(
-      {ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
+      {ONE_CHAT_MSG,
+       std::bind(&ChatService::oneChat, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
   msgHandlerMap_.insert(
-      {ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, _1, _2, _3)});
+      {ADD_FRIEND_MSG,
+       std::bind(&ChatService::addFriend, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
 
-  msgHandlerMap_.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup,
-                                                     this, _1, _2, _3)});
   msgHandlerMap_.insert(
-      {ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, _1, _2, _3)});
+      {CREATE_GROUP_MSG,
+       std::bind(&ChatService::createGroup, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
   msgHandlerMap_.insert(
-      {GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, _1, _2, _3)});
+      {ADD_GROUP_MSG,
+       std::bind(&ChatService::addGroup, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
   msgHandlerMap_.insert(
-      {LOGINOUT_MSG, std::bind(&ChatService::loginout, this, _1, _2, _3)});
+      {GROUP_CHAT_MSG,
+       std::bind(&ChatService::groupChat, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
+  msgHandlerMap_.insert(
+      {LOGINOUT_MSG,
+       std::bind(&ChatService::loginout, this, std::placeholders::_1,
+                 std::placeholders::_2, std::placeholders::_3)});
 
   if (redis_.connect()) {
     redis_.init_notify_handler(
-        std::bind(&ChatService::handleRedisSubscribeMessage, this, _1, _2));
+        std::bind(&ChatService::handleRedisSubscribeMessage, this,
+                  std::placeholders::_1, std::placeholders::_2));
   }
 }
 
@@ -39,7 +55,7 @@ MsgHandler ChatService::getHandler(int msgid) {
   auto it = msgHandlerMap_.find(msgid);
   if (it == msgHandlerMap_.end()) {
     return [=](const TcpConnectionPtr &conn, json &js, Timestamp time) {
-      LOG_ERROR << "msgid:" << msgid << " can not find handler!";
+      LOG_ERROR("msgid: %d can not find handler", msgid);
     };
   } else {
     return msgHandlerMap_[msgid];

@@ -2,22 +2,20 @@
 #define CHATSERVICE_H
 
 #include "friendmodel.hpp"
-#include "json.hpp"
-#include "redis.hpp"
-#include "offlinemessagemodel.hpp"
-#include "usermodel.hpp"
 #include "groupmodel.hpp"
+#include "json.hpp"
+#include "offlinemessagemodel.hpp"
+#include "redis.hpp"
+#include "usermodel.hpp"
+
+#include "TcpConnection.hpp"
+
 #include <functional>
-#include <muduo/net/TcpConnection.h>
 #include <mutex>
 #include <unordered_map>
 
 using namespace std;
-using namespace muduo;
-using namespace muduo::net;
-
 using json = nlohmann::json;
-
 using MsgHandler =
     std::function<void(const TcpConnectionPtr &conn, json &js, Timestamp)>;
 
