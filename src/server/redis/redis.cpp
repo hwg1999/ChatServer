@@ -1,5 +1,6 @@
 #include "redis.hpp"
 #include <iostream>
+#include <utility>
 using namespace std;
 
 Redis::Redis() : _publish_context(nullptr), _subcribe_context(nullptr) {}
@@ -111,5 +112,5 @@ void Redis::observer_channel_message() {
 }
 
 void Redis::init_notify_handler(function<void(int, string)> fn) {
-  this->_notify_message_handler = fn;
+  this->_notify_message_handler = std::move(fn);
 }
