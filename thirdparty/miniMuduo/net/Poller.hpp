@@ -9,7 +9,7 @@
 class Channel;
 class EventLoop;
 
-// muduo库中多路事件分发器的核心IO复用模块
+// 多路事件分发器的核心IO复用模块
 class Poller : noncopyable {
 public:
   using ChannelList = std::vector<Channel *>;
@@ -29,10 +29,12 @@ public:
   static Poller *newDefaultPoller(EventLoop *loop);
 
 protected:
-  // map的key：sockfd，value：sockfd所属的channel通道类型
+  // map的key：sockfd或者eventfd，value：sockfd所属的channel通道
   using ChannelMap = std::unordered_map<int, Channel *>;
+  // 保存所有fd对应的通道
   ChannelMap channels_;
 
 private:
-  EventLoop *ownerLoop_; // Poller所属的事件循环
+  // Poller所属的事件循环
+  EventLoop *ownerLoop_;
 };

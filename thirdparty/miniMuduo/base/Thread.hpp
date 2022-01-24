@@ -1,13 +1,13 @@
 #pragma once
 
-#include "noncopyable.hpp"
-
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <string>
 #include <thread>
 #include <unistd.h>
+
+#include "noncopyable.hpp"
 
 class Thread : noncopyable {
 public:
@@ -26,13 +26,13 @@ public:
   static int numCreated() { return numCreated_; }
 
 private:
-  void setDefaultName();
+  void setDefaultName(); // 默认线程名称 Thread_num
 
-  bool started_;
-  bool joined_;
-  std::shared_ptr<std::thread> thread_;
-  pid_t tid_;
-  ThreadFunc func_;
-  std::string name_;
-  static std::atomic_int numCreated_;
+  bool started_;                        // 线程是否开始运行
+  bool joined_;                         // 线程是否可join
+  std::shared_ptr<std::thread> thread_; // 线程变量
+  pid_t tid_;                           // 线程tid
+  ThreadFunc func_;                     // 线程回调函数
+  std::string name_;                    // 线程名称
+  static std::atomic_int numCreated_; // 原子操作，当前已经创建线程的数量
 };

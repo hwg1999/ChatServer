@@ -1,6 +1,7 @@
 #include "CurrentThread.hpp"
 
 namespace CurrentThread {
+// 线程局部对象
 __thread int t_cachedTid = 0;
 
 void cacheTid() {

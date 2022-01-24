@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-// 网络库底层的缓冲器类型定义
+// 网络库底层的缓冲器
 class Buffer {
 public:
   static const size_t kCheapPrepend = 8;
@@ -29,8 +29,7 @@ public:
       // 应用只读取了刻度缓冲区数据的一部分，就是len，还剩下
       // readerIndex_ += len -> writerIndex_
       readerIndex_ += len;
-    } else // len == readableBytes()
-    {
+    } else { // len == readableBytes()
       retrieveAll();
     }
   }
@@ -74,20 +73,23 @@ public:
 
 private:
   char *begin() {
-    // it.operator*()
     // vector底层数组首元素的地址，也就是数组的起始地址
-    return &*buffer_.begin();
+    return buffer_.data();
   }
-  const char *begin() const { return &*buffer_.begin(); }
+  
+  const char *begin() const { return buffer_.data(); }
+
   void makeSpace(size_t len) {
+    // 实际可用空间小于需要写入的空间
     if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
       buffer_.resize(writerIndex_ + len);
-    } else {
+    } else { // 内存腾挪
       size_t readable = readableBytes();
+      // 将readable数据移到buffer头部
       std::copy(begin() + readerIndex_, begin() + writerIndex_,
                 begin() + kCheapPrepend);
-      readerIndex_ = kCheapPrepend;
-      writerIndex_ = readerIndex_ + readable;
+      readerIndex_ = kCheapPrepend; // 重置readerIndex_ 为 kCheapPrepend
+      writerIndex_ = readerIndex_ + readable; // 修改 writerIndex_
     }
   }
 

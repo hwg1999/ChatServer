@@ -4,7 +4,7 @@
 
 class InetAddress;
 
-// 封装socket fd
+// 封装socket fd 即 监听socket
 class Socket : noncopyable {
 public:
   explicit Socket(int sockfd) : sockfd_(sockfd) {}
@@ -16,7 +16,7 @@ public:
   void listen();
   int accept(InetAddress *peeraddr);
 
-  void shutdownWrite();
+  void shutdownWrite(); 
 
   void setTcpNoDelay(bool on);
   void setReuseAddr(bool on);

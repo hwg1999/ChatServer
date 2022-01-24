@@ -22,15 +22,14 @@ public:
   void removeChannel(Channel *channel) override;
 
 private:
+  using EventList = std::vector<epoll_event>;
   // 填写活跃的连接
   void fillActiveChannels(int numEvents, ChannelList *activeChannels) const;
   // 更新channel
   void update(int operation, Channel *channel);
 
-  using EventList = std::vector<epoll_event>;
+  int epollfd_;      // epoll占用的fd
+  EventList events_; // 当前监听的 epoll_event 数组
 
-  static const int kInitEventListSize = 16;
-
-  int epollfd_;
-  EventList events_;
+  static const int kInitEventListSize = 16; // 初始的事件列表大小为16
 };

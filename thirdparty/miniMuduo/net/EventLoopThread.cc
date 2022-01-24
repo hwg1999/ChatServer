@@ -16,35 +16,37 @@ EventLoopThread::~EventLoopThread() {
 }
 
 EventLoop *EventLoopThread::startLoop() {
-  thread_.start(); // 启动底层的新线程
-
+  // 启动底层的新线程
+  thread_.start();
   EventLoop *loop = nullptr;
   {
     std::unique_lock<std::mutex> lock(mutex_);
+    // 等待loop初始化完毕
     while (loop_ == nullptr) {
-      cond_.wait(lock);
+      cond_.wait(lock); // 保证线程函数准备工作完成，EventLoop指针对象不为空
     }
     loop = loop_;
   }
   return loop;
 }
 
-// 下面这个方法，是在单独的新线程里面运行的
+// 该函数是EventLoopThread类的核心函数，作用是启动loop循环
+// 该函数和上面的startLoop函数并发执行，所以需要上锁和condition
 void EventLoopThread::threadFunc() {
-  EventLoop loop; // 创建一个独立的eventloop，和上面的线程是一一对应的，one loop
-                  // per thread
-
+  // 创建一个独立的eventloop，one loop per thread
+  EventLoop loop;
   if (callback_) {
-    callback_(&loop);
+    callback_(&loop); // 执行初始化回调函数
   }
 
   {
     std::unique_lock<std::mutex> lock(mutex_);
+    // loop_指针指向了这个创建的栈上的对象，threadFunc退出之后，这个指针就失效了
     loop_ = &loop;
     cond_.notify_one();
   }
 
-  loop.loop(); // EventLoop loop  => Poller.poll
+  loop.loop(); // 线程中执行事件循环
   std::unique_lock<std::mutex> lock(mutex_);
   loop_ = nullptr;
 }

@@ -13,7 +13,7 @@
 class Channel;
 class Poller;
 
-// 时间循环类  主要包含了两个大模块 Channel   Poller
+// 事件循环类  主要包含了两个大模块 Channel   Poller
 class EventLoop : noncopyable {
 public:
   using Functor = std::function<void()>;
@@ -33,25 +33,25 @@ public:
   // 把cb放入队列中，唤醒loop所在的线程，执行cb
   void queueInLoop(Functor cb);
 
-  // 用来唤醒loop所在的线程的
+  // 用来唤醒loop所在的线程
   void wakeup();
 
-  // EventLoop的方法 =》 Poller的方法
+  // EventLoop的方法 -> Poller的方法
   void updateChannel(Channel *channel);
   void removeChannel(Channel *channel);
   bool hasChannel(Channel *channel);
 
-  // 判断EventLoop对象是否在自己的线程里面
+  // 判断EventLoop对象当前是否运行在自己的线程里面
   bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
 
 private:
-  void handleRead();        // wake up
-  void doPendingFunctors(); // 执行回调
-
   using ChannelList = std::vector<Channel *>;
 
-  std::atomic_bool looping_; // 原子操作，通过CAS实现的
-  std::atomic_bool quit_;    // 标识退出loop循环
+  void handleRead();        // 用于唤醒loop
+  void doPendingFunctors(); // 执行回调
+  // 原子操作，通过CAS实现的
+  std::atomic_bool looping_; // 为false时退出loop
+  std::atomic_bool quit_;    // 标识是否退出loop循环
 
   const pid_t threadId_; // 记录当前loop所在线程的id
 
@@ -60,10 +60,10 @@ private:
 
   // 主要作用，当mainLoop获取一个新用户的channel时，
   // 通过轮询算法选择一个subloop，通过该成员唤醒subloop处理channel
-  int wakeupFd_;
-  std::unique_ptr<Channel> wakeupChannel_;
+  int wakeupFd_;                           // 用于eventfd
+  std::unique_ptr<Channel> wakeupChannel_; // 该通道将会纳入poller_来管理
 
-  ChannelList activeChannels_;
+  ChannelList activeChannels_; // Poller返回的活动通道
 
   std::atomic_bool
       callingPendingFunctors_; // 标识当前loop是否有需要执行的回调操作

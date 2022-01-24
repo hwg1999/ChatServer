@@ -1,7 +1,7 @@
-#include "Thread.hpp"
-#include "CurrentThread.hpp"
-
 #include <semaphore.h>
+
+#include "CurrentThread.hpp"
+#include "Thread.hpp"
 
 std::atomic_int Thread::numCreated_(0);
 
@@ -17,7 +17,7 @@ Thread::~Thread() {
   }
 }
 
-// FIXME 这里貌似可以省掉条件变量
+// TODO 这里貌似可以省掉条件变量
 // 一个Thread对象，记录的就是一个新线程的详细信息
 void Thread::start() {
   started_ = true;
@@ -33,8 +33,9 @@ void Thread::start() {
     func_();
   }));
 
-  // 这里必须等待获取上面新创建的线程的tid值
+  // 这里必须等待获取上面新创建的线程获取到自己的tid，即完全启动
   sem_wait(&sem);
+  sem_destroy(&sem);
 }
 
 void Thread::join() {

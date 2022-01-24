@@ -1,12 +1,12 @@
-#include "Socket.hpp"
-#include "InetAddress.hpp"
-#include "Logger.hpp"
-
 #include <netinet/tcp.h>
 #include <strings.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "InetAddress.hpp"
+#include "Logger.hpp"
+#include "Socket.hpp"
 
 Socket::~Socket() { close(sockfd_); }
 
@@ -24,15 +24,11 @@ void Socket::listen() {
 }
 
 int Socket::accept(InetAddress *peeraddr) {
-  /**
-   * 1. accept函数的参数不合法
-   * 2. 对返回的connfd没有设置非阻塞
-   * Reactor模型 one loop per thread
-   * poller + non-blocking IO
-   */
+
   sockaddr_in addr;
   socklen_t len = sizeof addr;
   bzero(&addr, sizeof addr);
+  // 设置fd为非阻塞 todo
   int connfd =
       ::accept4(sockfd_, (sockaddr *)&addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
   if (connfd >= 0) {
@@ -41,6 +37,7 @@ int Socket::accept(InetAddress *peeraddr) {
   return connfd;
 }
 
+// 优雅关闭socket, 此时关闭写，但是还能进行读操作
 void Socket::shutdownWrite() {
   if (::shutdown(sockfd_, SHUT_WR) < 0) {
     LOG_ERROR("shutdownWrite error");

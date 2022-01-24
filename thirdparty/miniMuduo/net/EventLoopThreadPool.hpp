@@ -29,11 +29,11 @@ public:
   const std::string name() const { return name_; }
 
 private:
-  EventLoop *baseLoop_; // EventLoop loop;
-  std::string name_;
-  bool started_;
-  int numThreads_;
-  int next_;
-  std::vector<std::unique_ptr<EventLoopThread>> threads_;
-  std::vector<EventLoop *> loops_;
+  EventLoop *baseLoop_; // Acceptor所属EventLoop
+  std::string name_;    // 线程池名称
+  bool started_;        // 是否已经启动
+  int numThreads_;      // 线程数
+  int next_;            // 新连接到来，所选择的EventLoop对象下标
+  std::vector<std::unique_ptr<EventLoopThread>> threads_; // IO线程列表
+  std::vector<EventLoop *> loops_;                        // EventLoop列表
 };
