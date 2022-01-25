@@ -1,12 +1,12 @@
 # ChatServer
 集群聊天服务器
 
-#目录树
+# 目录树
 ```
 ChatServer
 ├── CMakeLists.txt
 ├── autobuild.sh
-├── include
+├── include     
 │   ├── public.hpp
 │   └── server
 │       ├── chatserver.hpp
@@ -23,11 +23,11 @@ ChatServer
 │       ├── chatservice.cpp
 │       ├── db
 │       ├── main.cpp
-│       ├── model
-│       └── redis
+│       ├── model   操作数据库的model类实现
+│       └── redis
 └── thirdparty
-    ├── json.hpp
-    └── miniMuduo
+    ├── json.hpp   第三方json库nlohmann
+    └── miniMuduo  仿写的miniMuduo
         ├── base
         └── net
 ```
