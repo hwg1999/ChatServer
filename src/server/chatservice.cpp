@@ -91,7 +91,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
       // 查询该用户是否有离线消息
       vector<string> vec = offlineMessageModel_.query(id);
       if (!vec.empty()) {
-        response["offlinemessage"] = vec;
+        response["offlinemsg"] = vec;
         offlineMessageModel_.remove(id);
       }
 
@@ -105,7 +105,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
           js["state"] = user.getState();
           vec2.push_back(js.dump());
         }
-        response["friend"] = vec2;
+        response["friends"] = vec2;
       }
 
       vector<Group> groupuserVec = groupModel_.queryGroups(id);
@@ -187,7 +187,6 @@ void ChatService::clientCloseExcetion(const TcpConnectionPtr &conn) {
 void ChatService::oneChat(const TcpConnectionPtr &conn, json &js,
                           Timestamp time) {
   int toid = js["toid"].get<int>();
-
   {
     lock_guard<mutex> lock(connMutex_);
     auto it = userConnMap_.find(toid);
@@ -219,7 +218,7 @@ void ChatService::createGroup(const TcpConnectionPtr &conn, json &js,
   int userid = js["id"].get<int>();
   string name = js["groupname"];
   string desc = js["groupdesc"];
-
+  
   Group group(-1, name, desc);
   if (groupModel_.createGroup(group)) {
     groupModel_.addGroup(userid, group.getId(), "creator");

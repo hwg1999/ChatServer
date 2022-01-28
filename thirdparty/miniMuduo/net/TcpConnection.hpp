@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstddef>
 #include <memory>
 #include <string>
 
@@ -70,7 +71,7 @@ private:
   void handleClose();
   void handleError();
 
-  void sendInLoop(const void *message, size_t len);
+  void sendInLoop(const std::string &message);
   void shutdownInLoop();
 
   // 这里绝对不是baseLoop， 因为TcpConnection都是在subLoop里面管理的

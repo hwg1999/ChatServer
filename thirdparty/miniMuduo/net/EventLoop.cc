@@ -35,7 +35,7 @@ EventLoop::EventLoop()
       wakeupFd_(createEventfd()), // eventfd描述符，用于唤醒阻塞的poll
       wakeupChannel_(new Channel(this, wakeupFd_)) // eventfd封装的Channel
 {
-  LOG_DEBUG("func=%s => EventLoop created %p in thread %d ", __FUNCTION__, this,
+  LOG_DEBUG("func=%s => EventLoop %p created  in thread %d ", __FUNCTION__, this,
             threadId_);
   if (t_loopInThisThread) {
     LOG_FATAL("Another EventLoop %p exists in this thread %d ",
@@ -100,7 +100,7 @@ void EventLoop::runInLoop(Functor cb) {
   } else { // 其他线程调用，就先放入到任务队列，之后在loop中执行
     LOG_DEBUG(
         "queueInloop, current threadId = %d, this cb should run in thread : %d",
-        threadId_, CurrentThread::tid());
+        CurrentThread::tid(), threadId_);
     queueInLoop(cb);
   }
 }

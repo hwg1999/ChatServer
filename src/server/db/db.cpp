@@ -24,9 +24,9 @@ bool MySQL::connect() {
   if (p != nullptr) {
     // C和C++代码默认的编码字符是ASCII，如果不设置，从MySQL上拉下来的中文显示？
     mysql_query(conn_, "set names gbk");
-    LOG_INFO("connect mysql success!");
+    LOG_DEBUG("connect mysql success!");
   } else {
-    LOG_INFO("connect mysql fail!");
+    LOG_DEBUG("connect mysql fail!");
   }
 
   return p;

@@ -1,3 +1,4 @@
+#include "Logger.hpp"
 #include "json.hpp"
 #include <chrono>
 #include <ctime>
@@ -221,7 +222,7 @@ void doLoginResponse(json &responsejs) {
 
     // 显示登录用户的基本信息
     showCurrentUserData();
-
+    cout << "===================offline message===================" << endl;
     // 显示当前用户的离线消息  个人聊天信息或者群组消息
     if (responsejs.contains("offlinemsg")) {
       vector<string> vec = responsejs["offlinemsg"];
@@ -239,7 +240,7 @@ void doLoginResponse(json &responsejs) {
         }
       }
     }
-
+    cout << endl;
     g_isLoginSuccess = true;
   }
 }
@@ -252,7 +253,7 @@ void readTaskHandler(int clientfd) {
       close(clientfd);
       exit(-1);
     }
-
+    
     json js = json::parse(buffer);
     int msgtype = js["msgid"].get<int>();
     if (ONE_CHAT_MSG == msgtype) {
@@ -288,14 +289,14 @@ void showCurrentUserData() {
   cout << "======================login user======================" << endl;
   cout << "current login user => id:" << g_currentUser.getId()
        << " name:" << g_currentUser.getName() << endl;
-  cout << "----------------------friend list---------------------" << endl;
+  cout << "======================friend list======================" << endl;
   if (!g_currentUserFriendList.empty()) {
     for (User &user : g_currentUserFriendList) {
       cout << user.getId() << " " << user.getName() << " " << user.getState()
            << endl;
     }
   }
-  cout << "----------------------group list----------------------" << endl;
+  cout << "======================group list======================" << endl;
   if (!g_currentUserGroupList.empty()) {
     for (Group &group : g_currentUserGroupList) {
       cout << group.getId() << " " << group.getName() << " " << group.getDesc()
@@ -306,21 +307,14 @@ void showCurrentUserData() {
       }
     }
   }
-  cout << "======================================================" << endl;
 }
 
 void help(int fd = 0, string str = "");
-
 void chat(int, string);
-
 void addfriend(int, string);
-
 void creategroup(int, string);
-
 void addgroup(int, string);
-
 void groupchat(int, string);
-
 void loginout(int, string);
 
 unordered_map<string, string> commandMap = {
@@ -377,7 +371,8 @@ void addfriend(int clientfd, string str) {
   js["id"] = g_currentUser.getId();
   js["friendid"] = friendid;
   string buffer = js.dump();
-  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str() + 1), 0);
+  // bug:写成了strlen(buffer.c_str() + 1)导致json解析错误
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
   if (-1 == len) {
     cerr << "send addfriend msg error ->" << buffer << endl;
   }
@@ -438,8 +433,8 @@ void addgroup(int clientfd, string str) {
   js["id"] = g_currentUser.getId();
   js["groupid"] = groupid;
   string buffer = js.dump();
-
-  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str() + 1), 0);
+  
+  int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
   if (-1 == len) {
     cerr << "send addgroup msg error ->" << buffer << endl;
   }

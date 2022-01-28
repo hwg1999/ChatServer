@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "Socket.hpp"
 
+#include <cstddef>
 #include <errno.h>
 #include <functional>
 #include <netinet/tcp.h>
@@ -48,10 +49,10 @@ TcpConnection::~TcpConnection() {
 void TcpConnection::send(const std::string &buf) {
   if (state_ == kConnected) {
     if (loop_->isInLoopThread()) {
-      sendInLoop(buf.c_str(), buf.size());
+      sendInLoop(buf);
     } else {
       loop_->runInLoop(
-          std::bind(&TcpConnection::sendInLoop, this, buf.c_str(), buf.size()));
+          std::bind(&TcpConnection::sendInLoop, this, buf));
     }
   }
 }
@@ -60,15 +61,18 @@ void TcpConnection::send(const std::string &buf) {
  * 发送数据  应用写的快，而内核发送数据慢，需要把待发送数据写入缓冲区，
  * 而且设置了水位回调
  */
-void TcpConnection::sendInLoop(const void *data, size_t len) {
+void TcpConnection::sendInLoop(const std::string &buf) {
   // todo why not in loop thread
+  // bug:参数为const void *data的时候不知道为什么会乱码
   ssize_t nwrote = 0;
+  int len = buf.size();
   size_t remaining = len;
   bool faultError = false;
-
+  const char *data = buf.data();
+  
   // 之前调用过该connection的shutdown，不能再进行发送了
   if (state_ == kDisconnected) {
-    LOG_ERROR("disconnecte, gdive up writing!");
+    LOG_ERROR("disconnected, give up writing!");
     return;
   }
   // 如果当前channel没有写事件发生，并且发送buffer无待发送数据，那么直接发送

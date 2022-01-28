@@ -14,7 +14,7 @@ void OfflineMsgModel::insert(int userid, string msg) {
 
 void OfflineMsgModel::remove(int userid) {
   char sql[1024] = {0};
-  sprintf(sql, "delete * from offlinemessage where userid = %d", userid);
+  sprintf(sql, "delete from offlinemessage where userid = %d", userid);
 
   MySQL mysql;
   if (mysql.connect()) {
