@@ -1,7 +1,11 @@
-#include "chatserver.hpp"
-#include "chatservice.hpp"
 #include <iostream>
+#include <string>
+
 #include <signal.h>
+
+#include "chatserver.h"
+#include "chatservice.h"
+
 using namespace std;
 
 // 处理服务器ctrl+c结束后，重置user的状态信息
@@ -25,9 +29,10 @@ int main(int argc, char **argv)
 
     signal(SIGINT, resetHandler);
 
+    string serverName = "ChatServer[" + to_string(port) + "]";
     EventLoop loop;
     InetAddress addr(ip, port);
-    ChatServer server(&loop, addr, "ChatServer");
+    ChatServer server(&loop, addr, serverName);
 
     server.start();
     loop.loop();

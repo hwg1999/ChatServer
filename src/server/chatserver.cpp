@@ -1,8 +1,9 @@
-#include "chatserver.hpp"
+#include "chatserver.h"
 #include "json.hpp"
-#include "chatservice.hpp"
+#include "chatservice.h"
 
 #include <functional>
+
 using namespace std;
 using namespace placeholders;
 using json = nlohmann::json;
@@ -35,6 +36,6 @@ void ChatServer::onMessage(const TcpConnectionPtr &conn, Buffer *buffer, Timesta
   string buf = buffer->retrieveAllAsString();
   json js = json::parse(buf);
   auto msgHandler = ChatService::instance()->getHandler(js["msgid"].get<int>());
-    // 回调消息绑定好的事件处理器，来执行相应的业务处理
+  // 回调消息绑定好的事件处理器，来执行相应的业务处理
   msgHandler(conn, js, time);
 }

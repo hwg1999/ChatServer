@@ -1,5 +1,3 @@
-#include "Logger.hpp"
-#include "json.hpp"
 #include <chrono>
 #include <ctime>
 #include <functional>
@@ -8,8 +6,6 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
-using namespace std;
-using json = nlohmann::json;
 
 #include <arpa/inet.h>
 #include <atomic>
@@ -19,9 +15,15 @@ using json = nlohmann::json;
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "group.hpp"
-#include "public.hpp"
-#include "user.hpp"
+#include "group.h"
+#include "public.h"
+#include "user.h"
+
+#include "Logger.h"
+#include "json.hpp"
+
+using namespace std;
+using json = nlohmann::json;
 
 // 记录当前系统登录的用户信息
 User g_currentUser;
@@ -29,19 +31,13 @@ User g_currentUser;
 vector<User> g_currentUserFriendList;
 // 记录当前登录用户的群组列表信息
 vector<Group> g_currentUserGroupList;
-
 bool isMainMenuRunning = false;
-
 sem_t rwsem;
-
 atomic_bool g_isLoginSuccess{false};
 
 void readTaskHandler(int clientfd);
-
 string getCurrentTime();
-
 void mainMenu(int);
-
 void showCurrentUserData();
 
 // 聊天客户端程序实现，main线程用作发送线程，子线程用作接收线程
@@ -166,21 +162,17 @@ void doRegResponse(json &responsejs) {
 }
 
 void doLoginResponse(json &responsejs) {
-  if (0 != responsejs["errno"].get<int>()) // 登录失败
-  {
+  if (0 != responsejs["errno"].get<int>()) { // 登录失败
     cerr << responsejs["errmsg"] << endl;
     g_isLoginSuccess = false;
-  } else // 登录成功
-  {
+  } else { // 登录成功
     // 记录当前用户的id和name
     g_currentUser.setId(responsejs["id"].get<int>());
     g_currentUser.setName(responsejs["name"]);
-
     // 记录当前用户的好友列表信息
     if (responsejs.contains("friends")) {
       // 初始化
       g_currentUserFriendList.clear();
-
       vector<string> vec = responsejs["friends"];
       for (string &str : vec) {
         json js = json::parse(str);
@@ -191,12 +183,10 @@ void doLoginResponse(json &responsejs) {
         g_currentUserFriendList.push_back(user);
       }
     }
-
     // 记录当前用户的群组列表信息
     if (responsejs.contains("groups")) {
       // 初始化
       g_currentUserGroupList.clear();
-
       vector<string> vec1 = responsejs["groups"];
       for (string &groupstr : vec1) {
         json grpjs = json::parse(groupstr);
@@ -215,11 +205,9 @@ void doLoginResponse(json &responsejs) {
           user.setRole(js["role"]);
           group.getUsers().push_back(user);
         }
-
         g_currentUserGroupList.push_back(group);
       }
     }
-
     // 显示登录用户的基本信息
     showCurrentUserData();
     cout << "===================offline message===================" << endl;
@@ -228,7 +216,6 @@ void doLoginResponse(json &responsejs) {
       vector<string> vec = responsejs["offlinemsg"];
       for (string &str : vec) {
         json js = json::parse(str);
-        // time + [id] + name + " said: " + xxx
         if (ONE_CHAT_MSG == js["msgid"].get<int>()) {
           cout << js["time"].get<string>() << " [" << js["id"] << "]"
                << js["name"].get<string>()
@@ -249,11 +236,11 @@ void readTaskHandler(int clientfd) {
   for (;;) {
     char buffer[1024] = {0};
     int len = recv(clientfd, buffer, 1024, 0);
-    if (-1 == len || 0 == len) {
+    if (-1 == len || 0 == len) {  
       close(clientfd);
       exit(-1);
     }
-    
+
     json js = json::parse(buffer);
     int msgtype = js["msgid"].get<int>();
     if (ONE_CHAT_MSG == msgtype) {
@@ -396,7 +383,7 @@ void chat(int clientfd, string str) {
   js["msg"] = message;
   js["time"] = getCurrentTime();
   string buffer = js.dump();
-
+  // todo why plus 1
   int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
   if (-1 == len) {
     cerr << "send chat msg error -> " << buffer << endl;
@@ -433,7 +420,7 @@ void addgroup(int clientfd, string str) {
   js["id"] = g_currentUser.getId();
   js["groupid"] = groupid;
   string buffer = js.dump();
-  
+
   int len = send(clientfd, buffer.c_str(), strlen(buffer.c_str()) + 1, 0);
   if (-1 == len) {
     cerr << "send addgroup msg error ->" << buffer << endl;

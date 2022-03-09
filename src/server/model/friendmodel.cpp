@@ -1,4 +1,4 @@
-#include "friendmodel.hpp"
+#include "friendmodel.h"
 #include "db.h"
 
 void FriendModel::insert(int userid, int friendid) {

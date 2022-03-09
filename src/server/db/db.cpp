@@ -1,5 +1,5 @@
 #include "db.h"
-#include "Logger.hpp"
+#include "Logger.h"
 
 // 数据库配置信息
 static string server = "127.0.0.1";
@@ -22,7 +22,7 @@ bool MySQL::connect() {
       mysql_real_connect(conn_, server.c_str(), user.c_str(), password.c_str(),
                          dbname.c_str(), 3306, nullptr, 0);
   if (p != nullptr) {
-    // C和C++代码默认的编码字符是ASCII，如果不设置，从MySQL上拉下来的中文显示？
+    // C和C++代码默认的编码字符是ASCII，如果不设置，从MySQL上拉下来的中文显示乱码
     mysql_query(conn_, "set names gbk");
     LOG_DEBUG("connect mysql success!");
   } else {
@@ -38,7 +38,6 @@ bool MySQL::update(string sql) {
     LOG_INFO("%s:%d %s 更新失败!", __FILE__, __LINE__, sql.c_str());
     return false;
   }
-
   return true;
 }
 

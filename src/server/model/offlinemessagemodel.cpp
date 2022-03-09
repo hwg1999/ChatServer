@@ -1,4 +1,4 @@
-#include "offlinemessagemodel.hpp"
+#include "offlinemessagemodel.h"
 #include "db.h"
 
 void OfflineMsgModel::insert(int userid, string msg) {

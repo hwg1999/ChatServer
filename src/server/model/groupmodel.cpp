@@ -1,4 +1,4 @@
-#include "groupmodel.hpp"
+#include "groupmodel.h"
 #include "db.h"
 
 bool GroupModel::createGroup(Group &group) {

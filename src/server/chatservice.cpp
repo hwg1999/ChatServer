@@ -1,6 +1,6 @@
-#include "chatservice.hpp"
-#include "Logger.hpp"
-#include "public.hpp"
+#include "chatservice.h"
+#include "Logger.h"
+#include "public.h"
 
 #include <vector>
 
@@ -24,7 +24,6 @@ ChatService::ChatService() {
       {ADD_FRIEND_MSG,
        std::bind(&ChatService::addFriend, this, std::placeholders::_1,
                  std::placeholders::_2, std::placeholders::_3)});
-
   msgHandlerMap_.insert(
       {CREATE_GROUP_MSG,
        std::bind(&ChatService::createGroup, this, std::placeholders::_1,
@@ -41,7 +40,7 @@ ChatService::ChatService() {
       {LOGINOUT_MSG,
        std::bind(&ChatService::loginout, this, std::placeholders::_1,
                  std::placeholders::_2, std::placeholders::_3)});
-
+  // 初始化向业务层上报通道消息的回调对象
   if (redis_.connect()) {
     redis_.init_notify_handler(
         std::bind(&ChatService::handleRedisSubscribeMessage, this,
@@ -78,8 +77,9 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
     } else {
       {
         lock_guard<mutex> lock(connMutex_);
-        userConnMap_.insert({id, conn}); // 这里要考虑线程安全问题
+        userConnMap_.insert({id, conn}); 
       }
+      // 为该用户订阅，使其能收到其它服务器上的用户的消息
       redis_.subscribe(id);
       user.setState("online");
       userModel_.updateState(user);
@@ -94,7 +94,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
         response["offlinemsg"] = vec;
         offlineMessageModel_.remove(id);
       }
-
+      // 获取该用户的好友信息
       vector<User> userVec = friendModel_.query(id);
       if (!userVec.empty()) {
         vector<string> vec2;
@@ -107,7 +107,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
         }
         response["friends"] = vec2;
       }
-
+      // 获取该用户的群组信息
       vector<Group> groupuserVec = groupModel_.queryGroups(id);
       if (!groupuserVec.empty()) {
         vector<string> groupV;
@@ -132,7 +132,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js,
       }
       conn->send(response.dump());
     }
-  } else {
+  } else { // 账户或密码错误
     json response;
     response["msgid"] = LOGIN_MSG_ACK;
     response["errno"] = 1;
@@ -149,13 +149,13 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time) {
   user.setName(name);
   user.setPwd(pwd);
   bool state = userModel_.insert(user);
-  if (state) {
+  if (state) {  // 登录成功
     json response;
     response["msgid"] = REG_MSG_ACK;
     response["errno"] = 0;
     response["id"] = user.getId();
     conn->send(response.dump());
-  } else {
+  } else {  // 登录失败
     json response;
     response["msgid"] = REG_MSG_ACK;
     response["errno"] = 1;
@@ -197,7 +197,7 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js,
   }
 
   User user = userModel_.query(toid);
-  if (user.getState() == "online") {
+  if (user.getState() == "online") {  // 用户在线，但不在这台服务器上
     redis_.publish(toid, js.dump());
     return;
   }
@@ -218,7 +218,7 @@ void ChatService::createGroup(const TcpConnectionPtr &conn, json &js,
   int userid = js["id"].get<int>();
   string name = js["groupname"];
   string desc = js["groupdesc"];
-  
+
   Group group(-1, name, desc);
   if (groupModel_.createGroup(group)) {
     groupModel_.addGroup(userid, group.getId(), "creator");
@@ -239,6 +239,7 @@ void ChatService::groupChat(const TcpConnectionPtr &conn, json &js,
   vector<int> useridVec = groupModel_.queryGroupUsers(userid, groupid);
 
   lock_guard<mutex> lock(connMutex_);
+  // 依次发给该群组的其它用户
   for (int id : useridVec) {
     auto it = userConnMap_.find(id);
     if (it != userConnMap_.end()) {
@@ -279,7 +280,6 @@ void ChatService::handleRedisSubscribeMessage(int userid, string msg) {
     it->second->send(msg);
     return;
   }
-
-  // 存储该用户的离线消息
+  // 用户不在线，存储该用户的离线消息
   offlineMessageModel_.insert(userid, msg);
 }
