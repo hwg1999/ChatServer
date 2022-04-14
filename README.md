@@ -350,7 +350,7 @@ GroupModel group_model_;
 
 - **职责划分彻底，消息接收完全由子线程负责，设置一个信号量来同步，待子线程解析完毕后主线程才往下走，显示主界面。**
 
-**4、**客户端调用send时strlen(buffer.c\_str()) + 1写成了strlen(buffer.c\_str() + 1)导致json解析错误
+4、客户端调用send时strlen(buffer.c\_str()) + 1写成了strlen(buffer.c\_str() + 1)导致json解析错误
 
 - **通过LOG定位到错误（一开始cout发现生成的json没问题，逐步定位到send处发现问题）**
 
