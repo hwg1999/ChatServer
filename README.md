@@ -175,7 +175,7 @@ json["id"]			//要注销的id
 
 这里使用了仿写的miniMuduo，只写了服务端的代码，其简要类图如下
 
-![image-20220414103323339](asserts/image-20220414103323339.png)
+![image](https://user-images.githubusercontent.com/63459176/163308017-f0e9577f-b4de-49b6-8edc-b5507fd1dfdc.png)
 
 miniMuduo使用的是oneloop per thread + threadpool模型，有一个main reactor负责接收来自客户端的连接。然后使用轮询的方式给sub reactor去分配连接，而客户端的读写事件都在这个sub reactor上进行。
 
