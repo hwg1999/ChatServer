@@ -326,8 +326,8 @@ GroupModel group_model_;
 是像下面这样让服务器与服务器建立连接？
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210127201004249.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5taW5neHVlSVQ=,size_16,color_FFFFFF,t_70)
-这样肯定不行，服务器之间关联性太强了，一旦多加一个服务器，以前的服务器都要增加一条指向它的连接。
 
+这样肯定不行，服务器之间关联性太强了，一旦多加一个服务器，以前的服务器都要增加一条指向它的连接。
 所以，我们可以借鉴交换机连接PC的思想，引入Redis消息队列。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210127201649999.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5taW5neHVlSVQ=,size_16,color_FFFFFF,t_70)
