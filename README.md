@@ -185,10 +185,10 @@ miniMuduo使用的是oneloop per thread + threadpool模型，有一个main react
 
 ```cpp
 //注册连接回调
-server_.setConnectionCallback(bind(&ChatServer::on_connection, this, _1));
+server_.setConnectionCallback(bind(&ChatServer::OnConnection, this, _1));
 
 //注册消息回调
-server_.setMessageCallback(bind(&ChatServer::on_message, this, _1, _2, _3));
+server_.setMessageCallback(bind(&ChatServer::OnMessage, this, _1, _2, _3));
 ```
 
 在这里设置一个处理有关连接事件的方法和处理读写事件的方法。
@@ -207,7 +207,7 @@ void OnMessage(const TcpConnectionPtr &, Buffer *, Timestamp);
 
 ## 网络模块和业务模块解耦合
 
-在**通信模块**中，有一个字段`msgid`，其代表着服务器和客户端通信的消息类型，值是一个枚举类型，保存在`/include/public.hpp`文件中，总共有10个取值：
+在**通信模块**中，有一个字段`msgid`，其代表着服务器和客户端通信的消息类型，值是一个枚举类型，保存在`/include/public.h`文件中，总共有10个取值：
 
 ```cpp
     LOGIN_MSG = 1,  //登录消息，
