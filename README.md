@@ -23,7 +23,7 @@
 
 # 项目介绍
 
-项目主要是实现一个简易通讯工具，主要业务分为注册、登录、加好友、查看离线消息、一对一群聊、创建群、加入群、群聊等。
+项目主要是实现一个简易通讯工具，主要业务分为注册、登录、加好友、查看离线消息、一对一聊天、创建群、加入群、群聊等。
 
 详细业务流程关系如下图：
 
@@ -99,10 +99,6 @@ ChatServer
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210127151155139.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5taW5neHVlSVQ=,size_16,color_FFFFFF,t_70)
 
-- 名字带有model的类都是对数据库的操作类并不负责存储数据，而像User这个类则是负责暂存从数据库中查询到的数据
-- FriendModel和OfflineMessageModel则是没有暂存数据的上层类，这是因为对于Friend来说，其数据本身就是一个User，只需要查询到好友的id然后在User表中内联查询一下便可得到信息；对于OfflineMessage没有
-- 这些类都在`/include/server/model`里面
-
 # 通信格式
 
 服务器和客户端的通信采用了JSON来完成数据在网络中的标准传输。
@@ -172,8 +168,6 @@ json["time"]		//发送时间
 json["msgid"] = LOGINOUT_MSG;
 json["id"]			//要注销的id
 ```
-
-
 
 # 网络和业务模块
 
