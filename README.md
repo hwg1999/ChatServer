@@ -175,11 +175,15 @@ json["id"]			//要注销的id
 
 这里使用了仿写的miniMuduo，只写了服务端的代码，其简要类图如下
 
-![image](https://user-images.githubusercontent.com/63459176/163308017-f0e9577f-b4de-49b6-8edc-b5507fd1dfdc.png)
+![无标题](https://user-images.githubusercontent.com/63459176/164473132-2e10351d-dc79-4321-95e7-aa55c808574a.png)
 
 miniMuduo使用的是oneloop per thread + threadpool模型，有一个main reactor负责接收来自客户端的连接。然后使用轮询的方式给sub reactor去分配连接，而客户端的读写事件都在这个sub reactor上进行。
 
 ![image](https://user-images.githubusercontent.com/63459176/157204919-b51e3623-ea3b-42e4-9a62-0cbb23f2d1ca.png)
+
+工作流程
+![image](https://user-images.githubusercontent.com/63459176/164473061-cd824118-0e42-4305-93ee-eab7cad32aba.png)
+
 
 这里提供了两个非常重要的注册回调接口：**连接回调**和**消息回调**
 
@@ -201,7 +205,7 @@ void OnConnection(const TcpConnectionPtr &);
 void OnMessage(const TcpConnectionPtr &, Buffer *, Timestamp);
 ```
 
-当用户进行连接或者断开连接时便会调用OnConnection方法进行处理，其执行对象应该是main reactor。
+当用户进行连接或者断开连接时便会调用OnConnection方法进行处理。
 
 发生读写事件时，则会调用OnMessage方法，执行对象为sub reactor。
 
